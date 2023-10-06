@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?   @unique
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  age           Int?
+  bio           String?
+  accounts      Account[]
+  following     Follows[] @relation("follower")
+  followedBy    Follows[] @relation("following")
+  liked         Like[]
+  comments      Comment[]
+  blogs         Blog[]
+  mediaFiles    MediaFile[]
+  sessions      Session[]
+}
+
+model Blog {
+  id            String    @id @default(cuid())
+  title         String 
+  content       String 
+  image         String
+  authorId      String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  published     Boolean    @default(false)
+  author        User?      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes         Like[]  
+  comments      Comment[]   
+  mediaFiles    MediaFile[]
+}
+
+model MediaFile {
+  id            String     @id @default(cuid())
+  url           String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  userId        String
+  user          User?      @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  blogId        String
+  blog          Blog?      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id            String     @id @default(cuid())
+  userId        String
+  blogId        String 
+  blog          Blog?      @relation(fields:[blogId],references:[id], onDelete: Cascade)
+  user          User?      @relation(fields:[userId],references:[id], onDelete: Cascade)
+}
+
+model Comment {
+  id            String     @id @default(cuid())
+  content       String
+  userId        String
+  blogId        String 
+  blog          Blog?      @relation(fields:[blogId],references:[id], onDelete: Cascade)
+  user          User?      @relation(fields:[userId],references:[id], onDelete: Cascade)
+}
+
+model Follows {
+  followerId  String
+  followingId String
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  following   User   @relation("following", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
