@@ -1,41 +1,25 @@
-"use client";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
+import { getServerSession } from "next-auth";
+import Profile from "./Profile";
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+import { prisma } from "@/libs/prisma";
+import OwnerBlogList from "@/components/profile/OwnerBlogList";
 
-export default function ProfilePage() {
-  const { data: session, status } = useSession();
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
+  const currentUser = await prisma.user.findUnique({
+    where: {
+      email: session?.user.email,
+    },
+  });
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
   return (
     <section>
       <div className="container mx-auto">
-        <div className=" max-w-[400px] mx-auto">
-          <Image
-            src={session?.user.image ?? ""}
-            alt={session?.user.name}
-            width={100}
-            height={100}
-            className=" rounded-full"
-          />
-          <form action="">
-            <div className="">
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                defaultValue={session?.user.name ?? ""}
-              />
-            </div>
-            <div className="">
-              <label htmlFor="bio">Bio</label>
-              <input
-                type="text"
-                name="bio"
-                id="bio"
-                value={session?.user.bio ?? ""}
-              />
-            </div>
-          </form>
-        </div>
+        <Profile user={currentUser} />
+        <OwnerBlogList />
       </div>
     </section>
   );

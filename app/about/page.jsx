@@ -4,7 +4,7 @@ export default function AboutPage() {
   return (
     <section>
       <div className="container mx-auto">
-        <h3>About</h3>
+        <h3 className=" text-xl font-semibold">About</h3>
         <p className=" mt-3">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tenetur,
           velit quisquam cumque natus iste in, magnam deleniti illo itaque

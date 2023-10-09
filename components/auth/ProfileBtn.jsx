@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function ProfileBtn() {
   const { data: session, status } = useSession();
-  if (status === "loading") return <p>...</p>;
+  if (status === "loading") return <p></p>;
   if (status === "unauthenticated") return null;
   return (
     <div className=" flex gap-5 items-center">
